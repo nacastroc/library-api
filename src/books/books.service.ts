@@ -4,12 +4,14 @@ import { InjectModel } from '@nestjs/sequelize';
 import { FindAndCountOptions } from 'sequelize';
 import { IRows } from 'src/_core/interfaces/rows.interface';
 import { CreateBookDto, UpdateBookDto } from './books.dto';
+import { Section } from 'src/sections/sections.model';
 
 @Injectable()
 export class BooksService {
   constructor(
     @InjectModel(Book)
     private model: typeof Book,
+    private section: typeof Section,
   ) {}
 
   /**
@@ -49,19 +51,22 @@ export class BooksService {
   /**
    * Create a new book.
    *
-   * @param createBookDto - The data for creating a new book.
+   * @param dto - The data for creating a new book.
    * @returns A promise containing the newly created book.
    */
-  create(createBookDto: CreateBookDto): Promise<Book> {
-    // TODO: validate sectionId exists
+  create(dto: CreateBookDto): Promise<Book> {
+    // Check that the section exists
+    this._validateSection(dto.sectionId);
+
+    // Create the new book
     return this.model.create({
-      title: createBookDto.title,
-      author: createBookDto.author,
-      date: createBookDto.date,
-      cover: createBookDto.cover,
-      summary: createBookDto.summary,
-      copies: createBookDto.copies,
-      sectionId: createBookDto.sectionId,
+      title: dto.title,
+      author: dto.author,
+      date: dto.date,
+      cover: dto.cover,
+      summary: dto.summary,
+      copies: dto.copies,
+      sectionId: dto.sectionId,
     });
   }
 
@@ -69,11 +74,11 @@ export class BooksService {
    * Update a book by its ID.
    *
    * @param id - The ID of the book to update.
-   * @param updateBookDto - The data for updating the book.
+   * @param dto - The data for updating the book.
    * @returns A promise containing the updated book.
    * @throws NotFoundException if the book with the given ID doesn't exist.
    */
-  async update(id: number, updateBookDto: UpdateBookDto): Promise<Book> {
+  async update(id: number, dto: UpdateBookDto): Promise<Book> {
     const model = await this.model.findByPk(id);
 
     if (!model) {
@@ -81,16 +86,17 @@ export class BooksService {
       throw new NotFoundException(`Book with ID ${id} not found`);
     }
 
-    // TODO: validate sectionId exists
+    // Check that the section exists
+    this._validateSection(dto.sectionId);
 
     // Update the properties of the book with values from the DTO
-    model.title = updateBookDto.title;
-    model.author = updateBookDto.author;
-    model.date = updateBookDto.date;
-    model.summary = updateBookDto.summary;
-    model.cover = updateBookDto.cover;
-    model.copies = updateBookDto.copies;
-    model.sectionId = updateBookDto.sectionId;
+    model.title = dto.title;
+    model.author = dto.author;
+    model.date = dto.date;
+    model.summary = dto.summary;
+    model.cover = dto.cover;
+    model.copies = dto.copies;
+    model.sectionId = dto.sectionId;
 
     return model.save();
   }
@@ -110,5 +116,13 @@ export class BooksService {
     }
 
     await this.model.destroy();
+  }
+
+  private async _validateSection(id: number) {
+    const section = await this.section.findByPk(id);
+
+    if (!section) {
+      throw new NotFoundException(`Section with ID ${id} not found`);
+    }
   }
 }

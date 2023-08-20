@@ -1,23 +1,41 @@
 import { SectionsModule } from './sections/sections.module';
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BooksModule } from './books/books.module';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { QueryMiddleware } from './_core/middlewares/query.middleware';
+
+const sequelizeConfig = {
+  development: {
+    host: 'localhost',
+    port: 5432,
+    database: 'library_api_development',
+    username: 'postgres',
+    password: 'postgres',
+  },
+  test: {
+    host: 'localhost',
+    port: 5432,
+    database: 'library_api_test',
+    username: 'postgres',
+    password: 'postgres',
+  },
+  production: {
+    host: process.env.DB_HOST,
+    port: +process.env.DB_PORT,
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+  },
+};
 
 @Module({
   imports: [
-    // TODO: create production variants
     SequelizeModule.forRoot({
       dialect: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'postgres',
-      database: 'library_api_dev',
+      ...sequelizeConfig[process.env.NODE_ENV || 'development'],
       autoLoadModels: true,
-      synchronize: true,
+      synchronize: process.env.NODE_ENV !== 'production', // Disable automatic schema synchronization in production
     }),
     SectionsModule,
     BooksModule,
@@ -25,13 +43,4 @@ import { QueryMiddleware } from './_core/middlewares/query.middleware';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(QueryMiddleware)
-      .forRoutes(
-        { path: 'sections', method: RequestMethod.GET },
-        { path: 'books', method: RequestMethod.GET },
-      );
-  }
-}
+export class AppModule {}

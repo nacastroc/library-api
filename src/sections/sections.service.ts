@@ -54,13 +54,13 @@ export class SectionsService {
   /**
    * Create a new section.
    *
-   * @param createSectionDto - The data for creating a new section.
+   * @param dto - The data for creating a new section.
    * @returns A promise containing the newly created section.
    */
-  create(createSectionDto: CreateSectionDto): Promise<Section> {
+  create(dto: CreateSectionDto): Promise<Section> {
     return this.model.create({
-      name: createSectionDto.name,
-      description: createSectionDto.description,
+      name: dto.name,
+      description: dto.description,
     });
   }
 
@@ -68,14 +68,11 @@ export class SectionsService {
    * Update a section by its ID.
    *
    * @param id - The ID of the section to update.
-   * @param updateSectionDto - The data for updating the section.
+   * @param dto - The data for updating the section.
    * @returns A promise containing the updated section.
    * @throws NotFoundException if the section with the given ID doesn't exist.
    */
-  async update(
-    id: number,
-    updateSectionDto: UpdateSectionDto,
-  ): Promise<Section> {
+  async update(id: number, dto: UpdateSectionDto): Promise<Section> {
     const model = await this.model.findByPk(id);
 
     if (!model) {
@@ -84,8 +81,8 @@ export class SectionsService {
     }
 
     // Update the properties of the section with values from the DTO
-    model.name = updateSectionDto.name;
-    model.description = updateSectionDto.description;
+    model.name = dto.name;
+    model.description = dto.description;
 
     return model.save();
   }
