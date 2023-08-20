@@ -1,7 +1,19 @@
-import { Controller, Delete, Get, Param, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  Req,
+  ValidationPipe,
+} from '@nestjs/common';
 import { SectionsService } from './sections.service';
 import { Section } from './sections.model';
 import { IRows } from 'src/_core/interfaces/rows.interface';
+import { CreateSectionDto, UpdateSectionDto } from './sections.dto';
 
 @Controller('sections')
 export class SectionsController {
@@ -26,6 +38,33 @@ export class SectionsController {
   @Get(':id')
   findOne(@Param('id') id: string): Promise<Section> {
     return this.service.findOne(id);
+  }
+
+  /**
+   * Create a new section.
+   *
+   * @param dto - The data for creating a new section.
+   * @returns A promise containing the newly created section.
+   */
+  @Post()
+  create(@Body(new ValidationPipe()) dto: CreateSectionDto): Promise<Section> {
+    return this.service.create(dto);
+  }
+
+  /**
+   * Update a section by its ID.
+   *
+   * @param id - ID of the section to update.
+   * @param dto - The data for updating the section.
+   * @returns A promise containing the updated section.
+   */
+  @Put(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body(new ValidationPipe({ transform: true }))
+    dto: UpdateSectionDto,
+  ): Promise<Section> {
+    return this.service.update(id, dto);
   }
 
   /**

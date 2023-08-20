@@ -9,6 +9,7 @@ import { SectionsController } from './sections/sections.controller';
 
 @Module({
   imports: [
+    // TODO: create production variants
     SequelizeModule.forRoot({
       dialect: 'postgres',
       host: 'localhost',
@@ -27,6 +28,6 @@ import { SectionsController } from './sections/sections.controller';
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(QueryMiddleware).forRoutes(SectionsController);
+    consumer.apply(QueryMiddleware).forRoutes(SectionsController); // TODO: make more restricted and add books
   }
 }

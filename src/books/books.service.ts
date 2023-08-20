@@ -1,28 +1,114 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Book } from './books.model';
 import { InjectModel } from '@nestjs/sequelize';
+import { FindAndCountOptions } from 'sequelize';
+import { IRows } from 'src/_core/interfaces/rows.interface';
+import { CreateBookDto, UpdateBookDto } from './books.dto';
 
 @Injectable()
 export class BooksService {
   constructor(
     @InjectModel(Book)
-    private bookModel: typeof Book,
+    private model: typeof Book,
   ) {}
 
-  async findAll(): Promise<Book[]> {
-    return this.bookModel.findAll();
+  /**
+   * Find books based on provided options.
+   *
+   * @param opts - Options for querying books.
+   * @param pagination - If true, applies pagination to the results.
+   * @returns A promise containing an array of nooks or an object with rows and count.
+   */
+  async find(
+    opts: Omit<FindAndCountOptions<any>, 'group'>,
+    pagination = true,
+  ): Promise<IRows<Book> | Book[]> {
+    return pagination
+      ? this.model.findAndCountAll(opts)
+      : this.model.findAll(opts);
   }
 
-  findOne(id: string): Promise<Book> {
-    return this.bookModel.findOne({
+  /**
+   * Find a single book by its ID.
+   *
+   * @param id - The ID of the book to find.
+   * @returns A promise containing the found book.
+   */
+  async findOne(id: string): Promise<Book> {
+    const data = await this.model.findOne({
       where: {
         id,
       },
     });
+    if (!data) {
+      throw new NotFoundException(`Book with ID ${id} not found`);
+    }
+    return data;
   }
 
+  /**
+   * Create a new book.
+   *
+   * @param createBookDto - The data for creating a new book.
+   * @returns A promise containing the newly created book.
+   */
+  create(createBookDto: CreateBookDto): Promise<Book> {
+    // TODO: validate sectionId exists
+    return this.model.create({
+      title: createBookDto.title,
+      author: createBookDto.author,
+      date: createBookDto.date,
+      cover: createBookDto.cover,
+      summary: createBookDto.summary,
+      copies: createBookDto.copies,
+      sectionId: createBookDto.sectionId,
+    });
+  }
+
+  /**
+   * Update a book by its ID.
+   *
+   * @param id - The ID of the book to update.
+   * @param updateBookDto - The data for updating the book.
+   * @returns A promise containing the updated book.
+   * @throws NotFoundException if the book with the given ID doesn't exist.
+   */
+  async update(id: number, updateBookDto: UpdateBookDto): Promise<Book> {
+    const model = await this.model.findByPk(id);
+
+    if (!model) {
+      // Handle the case when the book with the given ID doesn't exist
+      throw new NotFoundException(`Book with ID ${id} not found`);
+    }
+
+    // TODO: validate sectionId exists
+
+    // Update the properties of the book with values from the DTO
+    model.title = updateBookDto.title;
+    model.author = updateBookDto.author;
+    model.date = updateBookDto.date;
+    model.summary = updateBookDto.summary;
+    model.cover = updateBookDto.cover;
+    model.copies = updateBookDto.copies;
+    model.sectionId = updateBookDto.sectionId;
+
+    return model.save();
+  }
+
+  /**
+   * Remove a book by its ID.
+   *
+   * @param id - The ID of the book to remove.
+   * @returns A promise that resolves when the book is removed.
+   * @throws NotFoundException if the book with the given ID doesn't exist.
+   */
   async remove(id: string): Promise<void> {
-    const book = await this.findOne(id);
-    await book.destroy();
+    const model = await this.findOne(id);
+
+    if (!model) {
+      throw new NotFoundException(`Book with ID ${id} not found`);
+    }
+
+    await this.model.destroy();
   }
 }
