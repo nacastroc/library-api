@@ -1,8 +1,8 @@
-import { IsInt, IsString, Length, Min } from 'class-validator';
+import { IsString, Length } from 'class-validator';
 
 const char255: [number, number] = [1, 255];
 
-export class CreateSectionDto {
+export class SectionDto {
   @IsString()
   @Length(...char255)
   name: string;
@@ -10,10 +10,4 @@ export class CreateSectionDto {
   @IsString()
   @Length(...char255)
   description: string;
-}
-
-export class UpdateSectionDto extends CreateSectionDto {
-  @IsInt()
-  @Min(1)
-  id: number;
 }

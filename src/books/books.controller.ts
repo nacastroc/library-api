@@ -13,7 +13,7 @@ import {
 import { Book } from './books.model';
 import { BooksService } from './books.service';
 import { IRows } from 'src/_core/interfaces/rows.interface';
-import { CreateBookDto, UpdateBookDto } from './books.dto';
+import { BookDto } from './books.dto';
 
 @Controller('books')
 export class BooksController {
@@ -36,7 +36,7 @@ export class BooksController {
    * @returns a single book
    */
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Book> {
+  findOne(@Param('id', ParseIntPipe) id: number): Promise<Book> {
     return this.service.findOne(id);
   }
 
@@ -47,7 +47,7 @@ export class BooksController {
    * @returns A promise containing the newly created book.
    */
   @Post()
-  create(@Body(new ValidationPipe()) dto: CreateBookDto): Promise<Book> {
+  create(@Body(new ValidationPipe()) dto: BookDto): Promise<Book> {
     return this.service.create(dto);
   }
 
@@ -62,7 +62,7 @@ export class BooksController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body(new ValidationPipe({ transform: true }))
-    dto: UpdateBookDto,
+    dto: BookDto,
   ): Promise<Book> {
     return this.service.update(id, dto);
   }
@@ -73,7 +73,7 @@ export class BooksController {
    * @returns void
    */
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
+  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.service.remove(id);
   }
 }

@@ -3,7 +3,7 @@ import { IsInt, IsString, Length, Min, IsDate, IsUrl } from 'class-validator';
 const char255: [number, number] = [1, 255];
 const char1000: [number, number] = [1, 1000];
 
-export class CreateBookDto {
+export class BookDto {
   @IsString()
   @Length(...char255)
   title: string;
@@ -29,10 +29,4 @@ export class CreateBookDto {
   @IsInt()
   @Min(1)
   sectionId: number;
-}
-
-export class UpdateBookDto extends CreateBookDto {
-  @IsInt()
-  @Min(1)
-  id: number;
 }

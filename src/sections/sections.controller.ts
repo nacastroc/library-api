@@ -13,7 +13,7 @@ import {
 import { SectionsService } from './sections.service';
 import { Section } from './sections.model';
 import { IRows } from 'src/_core/interfaces/rows.interface';
-import { CreateSectionDto, UpdateSectionDto } from './sections.dto';
+import { SectionDto } from './sections.dto';
 
 @Controller('sections')
 export class SectionsController {
@@ -36,7 +36,7 @@ export class SectionsController {
    * @returns a single section
    */
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Section> {
+  findOne(@Param('id', ParseIntPipe) id: number): Promise<Section> {
     return this.service.findOne(id);
   }
 
@@ -47,7 +47,7 @@ export class SectionsController {
    * @returns A promise containing the newly created section.
    */
   @Post()
-  create(@Body(new ValidationPipe()) dto: CreateSectionDto): Promise<Section> {
+  create(@Body(new ValidationPipe()) dto: SectionDto): Promise<Section> {
     return this.service.create(dto);
   }
 
@@ -62,7 +62,7 @@ export class SectionsController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body(new ValidationPipe({ transform: true }))
-    dto: UpdateSectionDto,
+    dto: SectionDto,
   ): Promise<Section> {
     return this.service.update(id, dto);
   }
@@ -73,7 +73,7 @@ export class SectionsController {
    * @returns void
    */
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
+  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.service.remove(id);
   }
 }

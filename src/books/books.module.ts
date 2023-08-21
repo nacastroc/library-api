@@ -4,9 +4,13 @@ import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Book } from './books.model';
 import { QueryMiddleware } from 'src/_core/middlewares/query.middleware';
+import { Section } from 'src/sections/sections.model';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Book])],
+  imports: [
+    SequelizeModule.forFeature([Book]),
+    SequelizeModule.forFeature([Section]),
+  ],
   controllers: [BooksController],
   providers: [BooksService],
 })
