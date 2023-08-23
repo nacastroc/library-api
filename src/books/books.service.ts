@@ -6,9 +6,9 @@ import {
 import { Book } from './books.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { FindAndCountOptions, Op } from 'sequelize';
-import { IRows } from 'src/_core/interfaces/rows.interface';
+import { IRows } from './../_core/interfaces/rows.interface';
 import { BookDto } from './books.dto';
-import { Section } from 'src/sections/sections.model';
+import { Section } from './../sections/sections.model';
 
 @Injectable()
 export class BooksService {

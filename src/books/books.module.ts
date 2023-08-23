@@ -3,8 +3,8 @@ import { BooksService } from './books.service';
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Book } from './books.model';
-import { QueryMiddleware } from 'src/_core/middlewares/query.middleware';
-import { Section } from 'src/sections/sections.model';
+import { QueryMiddleware } from './../_core/middlewares/query.middleware';
+import { Section } from './../sections/sections.model';
 
 @Module({
   imports: [

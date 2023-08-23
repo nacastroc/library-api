@@ -5,7 +5,7 @@ import {
   Model,
   Table,
 } from 'sequelize-typescript';
-import { Section } from 'src/sections/sections.model';
+import { Section } from './../sections/sections.model';
 
 @Table
 export class Book extends Model {

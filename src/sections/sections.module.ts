@@ -3,7 +3,7 @@ import { SectionsService } from './sections.service';
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { Section } from './sections.model';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { QueryMiddleware } from 'src/_core/middlewares/query.middleware';
+import { QueryMiddleware } from './../_core/middlewares/query.middleware';
 
 @Module({
   imports: [SequelizeModule.forFeature([Section])],

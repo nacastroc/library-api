@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { SectionsService } from './sections.service';
 import { Section } from './sections.model';
-import { IRows } from 'src/_core/interfaces/rows.interface';
+import { IRows } from './../_core/interfaces/rows.interface';
 import { SectionDto } from './sections.dto';
 
 @Controller('sections')

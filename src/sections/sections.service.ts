@@ -8,7 +8,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { IRows } from 'src/_core/interfaces/rows.interface';
 import { FindAndCountOptions, Op } from 'sequelize';
 import { SectionDto } from './sections.dto';
-import { Book } from 'src/books/books.model';
+import { Book } from './../books/books.model';
 
 @Injectable()
 export class SectionsService {
@@ -16,6 +16,10 @@ export class SectionsService {
     @InjectModel(Section)
     private model: typeof Section,
   ) {}
+
+  public get modelInstance() {
+    return this.model;
+  }
 
   /**
    * Find sections based on provided options.

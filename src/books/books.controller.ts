@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { Book } from './books.model';
 import { BooksService } from './books.service';
-import { IRows } from 'src/_core/interfaces/rows.interface';
+import { IRows } from './../_core/interfaces/rows.interface';
 import { BookDto } from './books.dto';
 
 @Controller('books')

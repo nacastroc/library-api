@@ -1,5 +1,5 @@
 import { Column, HasMany, Model, Table } from 'sequelize-typescript';
-import { Book } from 'src/books/books.model';
+import { Book } from './../books/books.model';
 
 @Table
 export class Section extends Model {
