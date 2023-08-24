@@ -9,10 +9,11 @@ import { BooksModule } from '../../books/books.module';
 import { Section } from '../sections.model';
 
 describe('SectionsController', () => {
+  let app: TestingModule;
   let sectionsController: SectionsController;
 
   beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
+    app = await Test.createTestingModule({
       imports: [
         SequelizeModule.forRoot({
           ...sequelizeConfig[process.env.NODE_ENV || 'test'],
@@ -47,15 +48,13 @@ describe('SectionsController', () => {
         expect(section).toHaveProperty('description');
         expect(typeof section.description).toBe('string');
         expect(section).toHaveProperty('createdAt');
-        expect(typeof section.createdAt).toBe('string');
+        expect(section.createdAt instanceof Date).toBe(true);
         expect(section).toHaveProperty('updatedAt');
-        expect(typeof section.description).toBe('string');
+        expect(section.updatedAt instanceof Date).toBe(true);
       });
     });
-  });
 
-  describe('/sections?pagination=false (GET)', () => {
-    it('should return all sections', async () => {
+    it('should return a non paginated list of sections if `pagination=false`', async () => {
       const mockRequest = {
         query: { pagination: 'false' },
       };
@@ -66,5 +65,27 @@ describe('SectionsController', () => {
       expect(response).not.toHaveProperty('rows');
       expect(response).not.toHaveProperty('count');
     });
+  });
+
+  describe('/sections (POST)', () => {
+    it('should allow creation of sections with valid data', async () => {
+      const mockRequest = {
+        name: 'Section 1',
+        description: 'Description 1',
+      };
+
+      try {
+        const response = await sectionsController.create(mockRequest);
+        expect(response).toBeInstanceOf(Section);
+      } catch (error) {
+        expect(error.message).toBe(
+          'Section with name Section 1 already exists',
+        );
+      }
+    });
+  });
+
+  afterEach(async () => {
+    app.close();
   });
 });
