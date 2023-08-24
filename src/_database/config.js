@@ -6,6 +6,7 @@ module.exports = {
     database: 'library_api_development',
     username: 'postgres',
     password: 'postgres',
+    logging: false,
   },
   test: {
     dialect: 'postgres',
@@ -14,6 +15,7 @@ module.exports = {
     database: 'library_api_test',
     username: 'postgres',
     password: 'postgres',
+    logging: false,
   },
   production: {
     dialect: 'postgres',
@@ -22,5 +24,6 @@ module.exports = {
     database: process.env.DB_NAME,
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
+    logging: false,
   },
 };
