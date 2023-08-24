@@ -30,7 +30,7 @@ describe('SectionsController', () => {
     sectionsController = app.get<SectionsController>(SectionsController);
   });
 
-  describe('/sections (GET)', () => {
+  describe('GET /sections', () => {
     it('should return a paginated list of sections', async () => {
       const mockRequest = {
         query: {},
@@ -67,7 +67,7 @@ describe('SectionsController', () => {
     });
   });
 
-  describe('/sections (POST)', () => {
+  describe('POST /sections', () => {
     it('should allow creation of sections with valid data', async () => {
       const mockRequest = {
         name: 'Section 1',
