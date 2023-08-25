@@ -8,12 +8,15 @@ import { SectionsModule } from './sections.module';
 import { BooksModule } from '../books/books.module';
 import { Section } from './sections.model';
 import { SectionsService } from './sections.service';
+import { Book } from '../books/books.model';
+import { BooksService } from '../books/books.service';
 
 describe('SectionsController', () => {
   let app: TestingModule;
   let controller: SectionsController;
-  let service: SectionsService;
-  let mockSections: Section[];
+  let sectionModel: typeof Section;
+  let bookModel: typeof Book;
+  let sections: Section[];
 
   beforeEach(async () => {
     app = await Test.createTestingModule({
@@ -31,11 +34,12 @@ describe('SectionsController', () => {
     }).compile();
 
     controller = app.get<SectionsController>(SectionsController);
-    service = app.get<SectionsService>(SectionsService);
+    sectionModel = app.get<SectionsService>(SectionsService).modelInstance;
+    bookModel = app.get<BooksService>(BooksService).modelInstance;
 
-    mockSections = [];
+    sections = [];
 
-    const sections = [
+    const sectionsData = [
       {
         name: 'Section 1',
         description: 'Description 1',
@@ -50,9 +54,19 @@ describe('SectionsController', () => {
       },
     ];
 
-    for (const section of sections) {
-      mockSections.push(await service.modelInstance.create(section));
+    for (const section of sectionsData) {
+      sections.push(await sectionModel.create(section));
     }
+
+    await bookModel.create({
+      title: 'Title 1',
+      author: 'Author 1',
+      summary: 'Summary 1',
+      cover: 'https://images.dummy.com/image.jpg',
+      copies: 1,
+      sectionId: sections[2].id,
+      date: new Date(),
+    });
   });
 
   describe('GET /sections', () => {
@@ -98,23 +112,23 @@ describe('SectionsController', () => {
 
   describe('POST /sections', () => {
     it('should allow to create sections with valid data', async () => {
-      const mockRequest = {
+      const section = {
         name: 'Section 4',
         description: 'Description 4',
       };
 
-      const response = await controller.create(mockRequest);
+      const response = await controller.create(section);
       expect(response).toBeInstanceOf(Section);
     });
 
     it('should return error when adding a section with the same name as an existing one', async () => {
-      const mockRequest = {
+      const section = {
         name: 'Section 1',
         description: 'Description 1',
       };
 
       try {
-        await controller.create(mockRequest);
+        await controller.create(section);
       } catch (error) {
         expect(error.message).toBe(
           'Section with name Section 1 already exists',
@@ -125,40 +139,40 @@ describe('SectionsController', () => {
 
   describe('PUT /sections/:id', () => {
     it('should allow to update sections with valid data by given id', async () => {
-      const mockRequest = {
+      const section = {
         name: 'Section 1 edited',
         description: 'Description 1 edited',
       };
 
-      const response = await controller.update(mockSections[0].id, mockRequest);
+      const response = await controller.update(sections[0].id, section);
       expect(response).toBeInstanceOf(Section);
     });
 
     it('should return error when updating a non existing section', async () => {
-      const mockRequest = {
+      const section = {
         name: 'Section edited',
         description: 'Description edited',
       };
 
-      const id = mockSections[2].id + 1;
+      const id = sections[2].id + 1;
 
       try {
-        await controller.update(id, mockRequest);
+        await controller.update(id, section);
       } catch (error) {
         expect(error.message).toBe(`Section with ID ${id} not found`);
       }
     });
 
     it('should return error when updating a section with the same name as an existing one', async () => {
-      const mockRequest = {
+      const section = {
         name: 'Section 1',
         description: 'Description edited',
       };
 
-      const id = mockSections[1].id;
+      const id = sections[1].id;
 
       try {
-        await controller.update(id, mockRequest);
+        await controller.update(id, section);
       } catch (error) {
         expect(error.message).toBe(
           'Section with name Section 1 already exists',
@@ -167,14 +181,47 @@ describe('SectionsController', () => {
     });
   });
 
-  afterEach(async () => {
-    const sections = await service.modelInstance.findAll();
+  describe('DELETE /sections:id', () => {
+    it('should allow to remove a section via its ID', async () => {
+      const response = await controller.remove(sections[0].id);
+      expect(response).toBeUndefined();
+    });
 
-    for (const section of sections) {
-      await section.destroy({ force: true });
+    it('should return error when removing a non existing section', async () => {
+      try {
+        await controller.remove(sections[2].id + 1);
+      } catch (error) {
+        expect(error.message).toBe(
+          `Section with ID ${sections[2].id + 1} not found`,
+        );
+      }
+    });
+
+    it('should return error when removing a section with existing books', async () => {
+      try {
+        await controller.remove(sections[2].id);
+      } catch (error) {
+        expect(error.message).toBe(
+          `Cannot delete section with ID ${sections[2].id} as it has existing books`,
+        );
+      }
+    });
+  });
+
+  afterEach(async () => {
+    const bookRecords = await bookModel.findAll();
+
+    for (const book of bookRecords) {
+      await book.destroy();
     }
 
-    mockSections = [];
+    const sectionRecords = await sectionModel.findAll();
+
+    for (const section of sectionRecords) {
+      await section.destroy();
+    }
+
+    sections = [];
 
     app.close();
   });

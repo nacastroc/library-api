@@ -19,6 +19,10 @@ export class BooksService {
     private sectionModel: typeof Section,
   ) {}
 
+  public get modelInstance() {
+    return this.model;
+  }
+
   /**
    * Find books based on provided options.
    *
