@@ -51,7 +51,7 @@ describe('SectionsController', () => {
     ];
 
     for (const section of sections) {
-      mockSections.push(await service.create(section));
+      mockSections.push(await service.modelInstance.create(section));
     }
   });
 
@@ -168,11 +168,10 @@ describe('SectionsController', () => {
   });
 
   afterEach(async () => {
-    const sectionsData = await service.find({}, false);
-    const sections = sectionsData['rows'] ? sectionsData['rows'] : sectionsData;
+    const sections = await service.modelInstance.findAll();
 
     for (const section of sections) {
-      await service.remove(section.id);
+      await section.destroy({ force: true });
     }
 
     mockSections = [];
