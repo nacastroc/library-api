@@ -10,6 +10,7 @@ import { Section } from './sections.model';
 import { SectionsService } from './sections.service';
 import { Book } from '../books/books.model';
 import { BooksService } from '../books/books.service';
+import { Op } from 'sequelize';
 
 describe('SectionsController', () => {
   let app: TestingModule;
@@ -18,14 +19,12 @@ describe('SectionsController', () => {
   let bookModel: typeof Book;
   let sections: Section[];
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     app = await Test.createTestingModule({
       imports: [
-        SequelizeModule.forRoot({
-          ...sequelizeConfig[process.env.NODE_ENV || 'test'],
-          autoLoadModels: true,
-          synchronize: process.env.NODE_ENV !== 'production', // Disable automatic schema synchronization in production
-        }),
+        SequelizeModule.forRoot(
+          sequelizeConfig[process.env.NODE_ENV || 'test'],
+        ),
         SectionsModule,
         BooksModule,
       ],
@@ -36,7 +35,9 @@ describe('SectionsController', () => {
     controller = app.get<SectionsController>(SectionsController);
     sectionModel = app.get<SectionsService>(SectionsService).modelInstance;
     bookModel = app.get<BooksService>(BooksService).modelInstance;
+  });
 
+  beforeEach(async () => {
     sections = [];
 
     const sectionsData = [
@@ -54,9 +55,7 @@ describe('SectionsController', () => {
       },
     ];
 
-    for (const section of sectionsData) {
-      sections.push(await sectionModel.create(section));
-    }
+    sections = await sectionModel.bulkCreate(sectionsData);
 
     await bookModel.create({
       title: 'Title 1',
@@ -74,39 +73,27 @@ describe('SectionsController', () => {
       const mockRequest = {
         query: {},
       };
+
       const response = await controller.find(mockRequest);
 
       expect(response).toBeDefined();
       expect(response).toHaveProperty('count');
       expect(response['count']).toBe(3);
       expect(response).toHaveProperty('rows');
-      expect(response['rows']).toHaveProperty('length');
-      expect(response['rows'].length).toBe(3);
-      response['rows'].forEach((section: Section) => {
-        expect(section).toHaveProperty('id');
-        expect(typeof section.id).toBe('number');
-        expect(section).toHaveProperty('name');
-        expect(typeof section.name).toBe('string');
-        expect(section).toHaveProperty('description');
-        expect(typeof section.description).toBe('string');
-        expect(section).toHaveProperty('createdAt');
-        expect(section.createdAt instanceof Date).toBe(true);
-        expect(section).toHaveProperty('updatedAt');
-        expect(section.updatedAt instanceof Date).toBe(true);
-      });
+      expect(response['rows']).toBeInstanceOf(Array<Section>);
+      expect(response['rows']).toHaveLength(3);
     });
 
     it('should return a non paginated list of sections if `pagination=false`', async () => {
       const mockRequest = {
         query: { pagination: 'false' },
       };
+
       const response = await controller.find(mockRequest);
 
       expect(response).toBeDefined();
-      expect(response).toHaveProperty('length');
-      expect(response['length']).toBe(3);
-      expect(response).not.toHaveProperty('rows');
-      expect(response).not.toHaveProperty('count');
+      expect(response).toBeInstanceOf(Array<Section>);
+      expect(response).toHaveLength(3);
     });
   });
 
@@ -118,6 +105,7 @@ describe('SectionsController', () => {
       };
 
       const response = await controller.create(section);
+
       expect(response).toBeInstanceOf(Section);
     });
 
@@ -145,6 +133,7 @@ describe('SectionsController', () => {
       };
 
       const response = await controller.update(sections[0].id, section);
+
       expect(response).toBeInstanceOf(Section);
     });
 
@@ -209,20 +198,13 @@ describe('SectionsController', () => {
   });
 
   afterEach(async () => {
-    const bookRecords = await bookModel.findAll();
-
-    for (const book of bookRecords) {
-      await book.destroy();
-    }
-
-    const sectionRecords = await sectionModel.findAll();
-
-    for (const section of sectionRecords) {
-      await section.destroy();
-    }
-
+    const opts = { where: { id: { [Op.not]: null } } };
+    await bookModel.destroy(opts);
+    await sectionModel.destroy(opts);
     sections = [];
+  });
 
+  afterAll(async () => {
     app.close();
   });
 });

@@ -7,6 +7,8 @@ export const config = {
     username: 'postgres',
     password: 'postgres',
     logging: false,
+    autoLoadModels: true,
+    synchronize: true,
   },
   test: {
     dialect: 'postgres',
@@ -16,6 +18,8 @@ export const config = {
     username: 'postgres',
     password: 'postgres',
     logging: false,
+    autoLoadModels: true,
+    synchronize: true,
   },
   production: {
     dialect: 'postgres',
@@ -25,5 +29,7 @@ export const config = {
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     logging: false,
+    autoLoadModels: true,
+    synchronize: false,
   },
 };

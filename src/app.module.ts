@@ -8,11 +8,9 @@ import { config as sequelizeConfig } from './_database/ts-config/config';
 
 @Module({
   imports: [
-    SequelizeModule.forRoot({
-      ...sequelizeConfig[process.env.NODE_ENV || 'development'],
-      autoLoadModels: true,
-      synchronize: process.env.NODE_ENV !== 'production', // Disable automatic schema synchronization in production
-    }),
+    SequelizeModule.forRoot(
+      sequelizeConfig[process.env.NODE_ENV || 'development'],
+    ),
     SectionsModule,
     BooksModule,
   ],
